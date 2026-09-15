@@ -128,7 +128,7 @@ st.markdown("""
 col_logo, col_title = st.columns([1, 5])
 
 with col_logo:
-    st.image("dashboard/assets/logo.png", width=380)
+    st.image("dashboard/assets/logo.png", width=420)
 
 with col_title:
     st.markdown("""
