@@ -32,7 +32,6 @@ from src.processamento import (
     calcular_receita_por_mes,
 )
 
-st.write("Chaves em st.secrets:", list(st.secrets.keys()))
 
 
 @st.cache_resource
