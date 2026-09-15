@@ -7,26 +7,14 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets",
 CREDENTIALS_PATH = "credentials/google-credentials.json"
 
 def conectar_planilha(sheet_id):
-    """
-    Authenticate with Google Sheets API and open a spreadsheet by its ID.
-    Reads credentials from Streamlit Secrets when available (cloud deploy),
-    falling back to a local JSON file for local development.
-
-    Args:
-        sheet_id (str): The unique ID of the Google Sheets spreadsheet,
-            found in the spreadsheet's URL between '/d/' and '/edit'.
-
-    Returns:
-        gspread.Spreadsheet: An authorized spreadsheet object, ready
-            for reading or writing data.
-    """
+    """..."""
     try:
         import streamlit as st
         info_credenciais = dict(st.secrets["gcp_service_account"])
         credenciais = Credentials.from_service_account_info(
             info_credenciais, scopes=SCOPES
         )
-    except (ImportError, KeyError, FileNotFoundError):
+    except (ImportError, KeyError):
         credenciais = Credentials.from_service_account_file(
             CREDENTIALS_PATH, scopes=SCOPES
         )
