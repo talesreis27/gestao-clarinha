@@ -285,7 +285,8 @@ def calcular_rateio_professoras(totais_por_turma, mapa_turmas):
 def explodir_pagamentos_por_turma(df_pagamentos_validos):
     """
     Split payments across multiple turmas when a student attends more than one,
-    dividing the paid amount equally among their turmas.
+    dividing the paid amount equally among their turmas. Rows with missing
+    turma data (e.g. unregistered students) are skipped.
 
     Args:
         df_pagamentos_validos (pandas.DataFrame): Payments merged with student 
@@ -297,6 +298,9 @@ def explodir_pagamentos_por_turma(df_pagamentos_validos):
     """
     linhas_explodidas = []
     for _, linha in df_pagamentos_validos.iterrows():
+        if pd.isna(linha["turmas"]):
+            continue
+
         lista_turmas = [t.strip() for t in linha["turmas"].split(",")]
         valor_por_turma = linha["Valor Recebido"] / len(lista_turmas)
         for turma in lista_turmas:
