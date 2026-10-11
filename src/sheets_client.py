@@ -14,7 +14,7 @@ def conectar_planilha(sheet_id):
         credenciais = Credentials.from_service_account_info(
             info_credenciais, scopes=SCOPES
         )
-    except (ImportError, KeyError):
+    except Exception:
         credenciais = Credentials.from_service_account_file(
             CREDENTIALS_PATH, scopes=SCOPES
         )
@@ -22,7 +22,6 @@ def conectar_planilha(sheet_id):
     cliente = gspread.authorize(credenciais)
     planilha = cliente.open_by_key(sheet_id)
     return planilha
-
 def ler_aba_como_lista(planilha, nome_aba):
     """
     Read all records from a specific worksheet as a list of dictionaries.

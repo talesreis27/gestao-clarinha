@@ -139,3 +139,7 @@ sequencias = calcular_sequencia_presenca(df_alunos, df_chamadas, aulas_por_turma
 print("Sequências de presença:", sequencias)
 
 print(df_chamadas["data_aula"].unique())
+
+cadastros_brutos = ler_aba_como_lista(planilha, "Respostas ao formulário cadastro")
+print("Cadastros brutos:")
+print(cadastros_brutos)
