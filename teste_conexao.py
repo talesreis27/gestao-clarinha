@@ -25,6 +25,7 @@ from src.processamento import (
     identificar_nomes_nao_cadastrados,
     identificar_alunos_em_risco,
     calcular_sequencia_presenca,
+    identificar_turmas_sem_chamada,
 )
 
 SHEET_ID = "1K3ani89aUvWf98N010dDcHhr1sYaTIcVEqFAcfknmwU"
@@ -143,3 +144,7 @@ print(df_chamadas["data_aula"].unique())
 cadastros_brutos = ler_aba_como_lista(planilha, "Respostas ao formulário cadastro")
 print("Cadastros brutos:")
 print(cadastros_brutos)
+
+turmas_atrasadas = identificar_turmas_sem_chamada(df_chamadas)
+print("Turmas sem chamada recente:")
+print(turmas_atrasadas)

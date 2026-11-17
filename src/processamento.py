@@ -597,3 +597,72 @@ def calcular_receita_por_mes(df_pagamentos_completo):
     """
     receita_por_mes = df_pagamentos_completo.groupby("Mês de Referencia")["Valor Recebido"].sum()
     return receita_por_mes
+
+def identificar_turmas_sem_chamada(df_chamadas, dias_limite=14):
+    """
+    Find turmas whose most recent attendance record is older than the limit.
+
+    Args:
+        df_chamadas (pandas.DataFrame): Processed attendance records with
+            'turma' and 'data_aula' columns (date as DD/MM/YYYY string).
+        dias_limite (int): Days without a record before a turma is flagged.
+            Defaults to 14.
+
+    Returns:
+        pandas.Series: Days since the last record, indexed by turma name,
+            only for turmas over the limit.
+    """
+    df = df_chamadas.copy()
+    df["data_aula"] = pd.to_datetime(df["data_aula"], format="%d/%m/%Y")
+    ultima_aula = df.groupby("turma")["data_aula"].max()
+    hoje = pd.Timestamp(datetime.date.today())
+    dias_sem_chamada = (hoje - ultima_aula).dt.days
+    atrasadas = dias_sem_chamada[dias_sem_chamada > dias_limite]
+    return atrasadas
+
+def filtrar_pagamentos_por_mes(df_pagamentos, mes_referencia):
+    """
+    Filtra os pagamentos apenas pelo 'Mês de Referencia' desejado (ex: '2026-11' ou 'Novembro/2026').
+    Faz com que caixa, pendentes e rateio reiniciem automaticamente na virada do mês.
+    """
+    if df_pagamentos.empty or "Mês de Referencia" not in df_pagamentos.columns:
+        return df_pagamentos
+    
+    filtro = df_pagamentos["Mês de Referencia"].astype(str).str.strip() == str(mes_referencia).strip()
+    return df_pagamentos[filtro].copy()
+
+
+def filtrar_chamadas_por_mes(df_chamadas, ano, mes):
+    """
+    Filtra as chamadas apenas para o ano e mês especificados.
+    Faz com que o ranking e o percentual de presença reiniciem na virada do mês.
+    """
+    if df_chamadas.empty:
+        return df_chamadas
+
+    df = df_chamadas.copy()
+    datas = pd.to_datetime(df["data_aula"], format="%d/%m/%Y", errors="coerce")
+    df_mes = df[(datas.dt.year == ano) & (datas.dt.month == mes)].copy()
+    return df_mes
+
+
+def gerar_resumo_fechamento_mensal(mes_referencia, totais_por_turma, rateio_professoras, ranking_geral):
+    """
+    Consolida os resultados do mês em um DataFrame pronto para ser salvo
+    em uma aba de histórico antes de virar o mês.
+    """
+    total_arrecadado = float(totais_por_turma.sum()) if not totais_por_turma.empty else 0.0
+    top_aluno = ranking_geral.iloc[0]["nome"] if not ranking_geral.empty else "N/A"
+    top_perc = round(float(ranking_geral.iloc[0]["percentual_presenca"]), 1) if not ranking_geral.empty else 0.0
+
+    resumo = {
+        "mes_referencia": mes_referencia,
+        "data_fechamento": datetime.date.today().strftime("%d/%m/%Y"),
+        "total_arrecadado": total_arrecadado,
+        "aluno_destaque_presenca": f"{top_aluno} ({top_perc}%)",
+    }
+
+    for prof, valor in rateio_professoras.items():
+        resumo[f"rateio_{prof.lower()}"] = round(float(valor), 2)
+
+    return pd.DataFrame([resumo])
